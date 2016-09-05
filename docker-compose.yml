@@ -1,0 +1,40 @@
+version: "2"
+
+services:
+  jenkins:
+    build: .
+    depends_on:
+      - dev_server
+    links:
+      - dev_server
+    restart: always
+    ports:
+      - "8005:8080"
+      - "50005:50000"
+      - "2205:22"
+    volumes:
+      - ./var/jenkins_home:/var/jenkins_home
+      - ./root/.ssh/:/root/.ssh/
+    environment:
+      - ENVIRONMENT=docker
+      - JENKINS_SLAVE_AGENT_PORT=50000
+    networks:
+      - back
+    container_name: jenkins
+
+  dev_server:
+    build: ./docker/dev_server
+    restart: always
+    ports:
+      - "8006:8000"
+      - "2206:22"
+    volumes: 
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - ENVIRONMENT=docker
+    networks:
+      - back
+
+networks:
+  back:
+    driver: bridge
